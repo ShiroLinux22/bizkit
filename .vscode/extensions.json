@@ -1,0 +1,12 @@
+{
+	"recommendations": [
+		"coenraads.bracket-pair-colorizer",
+		"ms-azuretools.vscode-docker",
+		"dbaeumer.vscode-eslint",
+		"cschleiden.vscode-github-actions",
+		"eamodio.gitlens",
+		"golang.go",
+		"christian-kohler.npm-intellisense",
+		"esbenp.prettier-vscode"
+	]
+}

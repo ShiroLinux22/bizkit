@@ -1,0 +1,8 @@
+{
+	"name": "@ryukobot/info",
+	"private": true,
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "tsc"
+    }
+}

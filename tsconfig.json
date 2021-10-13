@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "incremental": true,
+		"moduleResolution": "node",
+		"target": "es6",
+		"module": "commonjs",
+		"baseUrl": ".",
+		"rootDir": ".",
+		"outDir": "./dist",
+        "sourceMap": true,
+		"strict": true,
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true
+	},
+    "references": [
+        {
+            "path": "info"
+        }
+    ],
+    "include": ["src/**/*"],
+	"exclude": ["node_modules", "dist"]
+}
