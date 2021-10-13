@@ -116,3 +116,7 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+# Ignore (and don't ignore) for dotenv.
+.env
+.env.me
+!.env.project

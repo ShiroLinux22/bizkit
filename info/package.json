@@ -1,8 +1,13 @@
 {
 	"name": "@ryukobot/info",
+	"version": "1.0.0",
 	"private": true,
-    "main": "dist/index.js",
-    "scripts": {
-        "build": "tsc"
-    }
+	"main": "dist/index.js",
+	"scripts": {
+		"start": "node .",
+		"build": "tsc"
+	},
+	"dependencies": {
+		"dotenv": "^10.0.0"
+	}
 }
