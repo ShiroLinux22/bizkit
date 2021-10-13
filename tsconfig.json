@@ -1,23 +1,29 @@
 {
-    "compilerOptions": {
-        "incremental": true,
+	"compilerOptions": {
+		"incremental": true,
 		"moduleResolution": "node",
-		"target": "es6",
-		"module": "commonjs",
+		"target": "es2017",
+		"module": "esnext",
 		"baseUrl": ".",
 		"rootDir": ".",
 		"outDir": "./dist",
-        "sourceMap": true,
+		"sourceMap": true,
 		"strict": true,
 		"resolveJsonModule": true,
 		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true
+		"forceConsistentCasingInFileNames": true,
+		"paths": {
+			"@ryukobot/common": ["common"]
+		}
 	},
-    "references": [
-        {
-            "path": "info"
-        }
-    ],
-    "include": ["src/**/*"],
+	"references": [
+		{
+			"path": "info"
+		},
+		{
+			"path": "common"
+		}
+	],
+	"include": ["src/**/*"],
 	"exclude": ["node_modules", "dist"]
 }

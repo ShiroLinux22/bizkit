@@ -4,9 +4,7 @@
 		"baseUrl": ".",
 		"rootDir": "./src",
 		"outDir": "./dist",
-		"paths": {
-			"@ryukobot/common": ["../common"]
-		}
+		"declaration": true
 	},
 	"include": ["src/**/*"],
 	"exclude": ["dist/**/*"]
