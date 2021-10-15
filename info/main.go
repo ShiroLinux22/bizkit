@@ -1,41 +1,116 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 
+	"github.com/chakernet/ryuko/common/amqp"
+	"github.com/chakernet/ryuko/common/util"
 	"github.com/chakernet/ryuko/info/events"
-	"github.com/chakernet/ryuko/info/util"
 	"github.com/diamondburned/arikawa/v3/session"
 	"github.com/joho/godotenv"
+	_amqp "github.com/streadway/amqp"
+)
+
+var (
+	log = util.Logger {
+		Name: "main",
+	}
 )
 
 func main() {
-	log := util.Logger {
-		Name: "main",
-	}
-	
+	log.Info("Initializing...")
 	// Load Env
 	err := godotenv.Load("../.env")
-	log.FatalOnError(err, "Failed to load env")
+	if err != nil {
+		log.Fatal("Failed to load env: %s", err)
+	}
 	token := os.Getenv("BOT_TOKEN")
+
+	// Connect to amqp
+	amconn, err := amqp.Connect()
+	if err != nil {
+		log.Fatal("Error connecting to rabbitmq: %s", err)
+	}
+	defer amconn.Close()
+	ch, err := amqp.Channel(amconn)
+	if err != nil {
+		log.Fatal("Error creating amqp channel: %s", err)
+	}
+	defer ch.Close()
+	log.Info("Connected to RabbitMQ")
 
 	// Create Session
 	s, err := session.New("Bot " + token)
-	log.FatalOnError(err, "Failed to create session")
+	if err != nil {
+		log.Fatal("Failed to create session: %s", err)
+	}
+	defer s.Close()
 
-	bindEvents(s)
+	bindEvents(s, ch)
 
 	select {}
 }
 
-func bindEvents(sess *session.Session) {
+func bindEvents(sess *session.Session, ch *_amqp.Channel) {
 	handler := events.EventHandler {
 		Discord: sess,
 	}
 
-	handler.Handle(events.Event{
-		Type: "MESSAGE_CREATE",
-		Shard: 0,
-		Data: `{"id":"898568570668195930","channel_id":"867791409008607276","guild_id":"867791409008607273","type":0,"flags":0,"tts":false,"pinned":false,"mention_everyone":false,"mentions":[],"mention_roles":[],"author":{"id":"739969527957422202","username":"jacany","discriminator":"0001","avatar":"29cc2fc918ff8475eeae071e06ba39fd","public_flags":64},"content":"f","timestamp":"2021-10-15T13:50:41Z","edited_timestamp":null,"attachments":[],"embeds":[],"nonce":"898568569896304640","member":{"user":{"id":null,"username":"","discriminator":"","avatar":""},"roles":["889865510232162354"],"joined_at":"2021-07-22T15:33:14Z","premium_since":null,"deaf":false,"mute":false,"pending":false}}`,
-	})
+	q, err := ch.QueueDeclare(
+		"info_events",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		log.Fatal("Failed to Declare a Queue: %s", err)
+	}
+
+	err = ch.QueueBind(
+		q.Name,
+		"message.create",
+		"events_topic",
+		false,
+		nil,
+	)
+
+	if err != nil {
+		log.Fatal("Failed to Bind a Queue: %s", err)
+	}
+
+	msgs, err := ch.Consume(
+		q.Name,
+		"",
+		false,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		log.Fatal("Failed to Consume a Queue: %s", err)
+	}
+
+	go func() {
+		for d := range msgs {
+			var parsed events.Event
+
+			err := json.Unmarshal([]byte(d.Body), &parsed)
+
+			if err != nil {
+				log.Error("Failed to Parse a Message: %s", err)
+				return
+			}
+
+			handler.Handle(parsed)
+
+			// Ack at the end to signify that we processed this event
+			d.Ack(false)
+		}
+	}()
 }

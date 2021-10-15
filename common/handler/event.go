@@ -1,22 +1,27 @@
-package events
+package handler
 
 import (
 	"encoding/json"
+	"errors"
 
-	"github.com/chakernet/ryuko/common/util"
+	"github.com/diamondburned/arikawa/v3/session"
+	"github.com/go-redis/redis/v8"
+	"github.com/streadway/amqp"
+
 	"github.com/diamondburned/arikawa/v3/discord"
 	"github.com/diamondburned/arikawa/v3/gateway"
-	"github.com/diamondburned/arikawa/v3/session"
 )
 
-var (
-	log = util.Logger {
-		Name: "EventHandler",
-	}
-)
+type iEventHandler interface {
+	MessageCreate(*gateway.MessageCreateEvent);
+}
 
 type EventHandler struct {
+	iEventHandler
+
+	Channel *amqp.Channel
 	Discord *session.Session
+	Redis *redis.Client
 }
 
 type Event struct {
@@ -25,7 +30,7 @@ type Event struct {
 	Data string `json:"data,omitempty"`
 }
 
-func (h *EventHandler) Handle(e Event) {
+func (h *EventHandler) Handle(e Event) error {
 	raw := []byte(e.Data)
 
 	switch e.Type {
@@ -35,15 +40,13 @@ func (h *EventHandler) Handle(e Event) {
 		err := json.Unmarshal(raw, &data)
 
 		if err != nil {
-			log.Error("Error trying to parse Event: %s", err)
-			return
+			return err
 		}
 
 		mem, err := h.Discord.Member(data.GuildID, data.Author.ID)
 
 		if err != nil {
-			log.Error("Error trying to fetch member: %s", err)
-			return
+			return err
 		}
 
 		h.MessageCreate(&gateway.MessageCreateEvent{
@@ -53,6 +56,8 @@ func (h *EventHandler) Handle(e Event) {
 		break;
 
 	default:
-		log.Error("Unknown Event: %s", e.Type)
+		return errors.New("invalid event")
 	}
+
+	return nil
 }

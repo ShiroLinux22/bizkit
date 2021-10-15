@@ -4,10 +4,11 @@ import (
 	"context"
 	"os"
 
+	"github.com/chakernet/ryuko/common/amqp"
+	"github.com/chakernet/ryuko/common/handler"
+	"github.com/chakernet/ryuko/common/redis"
+	"github.com/chakernet/ryuko/common/util"
 	"github.com/chakernet/ryuko/gateway/events"
-	"github.com/chakernet/ryuko/gateway/util"
-	"github.com/chakernet/ryuko/gateway/util/amqp"
-	"github.com/chakernet/ryuko/gateway/util/redis"
 	"github.com/diamondburned/arikawa/v3/gateway"
 	"github.com/diamondburned/arikawa/v3/session"
 	_redis "github.com/go-redis/redis/v8"
@@ -31,12 +32,20 @@ func main() {
 	// Connect to Redis
 	rdb := redis.Connect()
 	defer rdb.Close()
+	log.Info("Connected to Redis")
 
 	// Connect to rabbitmq
-	amconn := amqp.Connect()
+	amconn, err := amqp.Connect()
+	if err != nil {
+		log.Fatal("Error connecting to rabbitmq: %s", err)
+	}
 	defer amconn.Close()
-	ch := amqp.Channel(amconn)
+	ch, err := amqp.Channel(amconn)
+	if err != nil {
+		log.Fatal("Error creating amqp channel: %s", err)
+	}
 	defer ch.Close()
+	log.Info("Connected to RabbitMQ")
 
 	// Create Session
 	s, err := session.New("Bot " + token)
@@ -81,10 +90,12 @@ func bindEvents(s *session.Session, ch *_amqp.Channel, log *util.Logger, rdb *_r
 		log.Fatal("Failed to declare an exchange: ", err)
 	}
 
-	handler := events.EventHandler {
-		Discord: s,
-		Channel: ch,
-		Redis: rdb,
+	handler := events.Handler {
+		EventHandler: handler.EventHandler{
+			Discord: s,
+			Channel: ch,
+			Redis: rdb,
+		},
 	}
 
 	s.AddHandler(handler.MessageCreate)
