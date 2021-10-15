@@ -12,5 +12,5 @@ var (
 )
 
 type Handler struct {
-	handler.EventHandler;
+	handler.EventHandlerR;
 }

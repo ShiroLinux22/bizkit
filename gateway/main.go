@@ -91,7 +91,7 @@ func bindEvents(s *session.Session, ch *_amqp.Channel, log *util.Logger, rdb *_r
 	}
 
 	handler := events.Handler {
-		EventHandler: handler.EventHandler{
+		EventHandlerR: handler.EventHandlerR{
 			Discord: s,
 			Channel: ch,
 			Redis: rdb,

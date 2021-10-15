@@ -12,13 +12,20 @@ import (
 	"github.com/diamondburned/arikawa/v3/gateway"
 )
 
-type iEventHandler interface {
-	MessageCreate(*gateway.MessageCreateEvent);
+type IEventHandler interface {
+	MessageCreate(*gateway.MessageCreateEvent) error;
 }
 
 type EventHandler struct {
-	iEventHandler
+	IEventHandler
 
+	Channel *amqp.Channel
+	Discord *session.Session
+	Redis *redis.Client
+}
+
+// R means 'reduced'
+type EventHandlerR struct {
 	Channel *amqp.Channel
 	Discord *session.Session
 	Redis *redis.Client
@@ -49,10 +56,14 @@ func (h *EventHandler) Handle(e Event) error {
 			return err
 		}
 
-		h.MessageCreate(&gateway.MessageCreateEvent{
+		err = h.MessageCreate(&gateway.MessageCreateEvent{
 			Message: data,
 			Member: mem,
 		})
+
+		if err != nil {
+			return err
+		}
 		break;
 
 	default:

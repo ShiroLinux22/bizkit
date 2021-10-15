@@ -5,9 +5,12 @@ import (
 	"os"
 
 	"github.com/chakernet/ryuko/common/amqp"
+	"github.com/chakernet/ryuko/common/handler"
+	"github.com/chakernet/ryuko/common/redis"
 	"github.com/chakernet/ryuko/common/util"
 	"github.com/chakernet/ryuko/info/events"
 	"github.com/diamondburned/arikawa/v3/session"
+	_redis "github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
 	_amqp "github.com/streadway/amqp"
 )
@@ -26,6 +29,11 @@ func main() {
 		log.Fatal("Failed to load env: %s", err)
 	}
 	token := os.Getenv("BOT_TOKEN")
+
+	// Connect to redis
+	redconn := redis.Connect()
+	defer redconn.Close()
+	log.Info("Initialized Redis Connection")
 
 	// Connect to amqp
 	amconn, err := amqp.Connect()
@@ -47,15 +55,20 @@ func main() {
 	}
 	defer s.Close()
 
-	bindEvents(s, ch)
+	bindEvents(s, ch, redconn)
 
 	select {}
 }
 
-func bindEvents(sess *session.Session, ch *_amqp.Channel) {
-	handler := events.EventHandler {
-		Discord: sess,
+func bindEvents(sess *session.Session, ch *_amqp.Channel, redis *_redis.Client) {
+	_handler := &events.Handler {
+		EventHandler: handler.EventHandler{
+			Discord: sess,
+			Channel: ch,
+			Redis: redis,
+		},
 	}
+	_handler.IEventHandler = _handler
 
 	q, err := ch.QueueDeclare(
 		"info_events",
@@ -98,16 +111,23 @@ func bindEvents(sess *session.Session, ch *_amqp.Channel) {
 
 	go func() {
 		for d := range msgs {
-			var parsed events.Event
+			var event handler.Event
 
-			err := json.Unmarshal([]byte(d.Body), &parsed)
+			err := json.Unmarshal([]byte(d.Body), &event)
 
 			if err != nil {
 				log.Error("Failed to Parse a Message: %s", err)
-				return
+				d.Nack(false, true)
+				continue
 			}
 
-			handler.Handle(parsed)
+			err = _handler.Handle(event)
+
+			if err != nil {
+				log.Error("Failed to Handle a Message: %s", err)
+				d.Nack(false, true)
+				continue
+			}
 
 			// Ack at the end to signify that we processed this event
 			d.Ack(false)
