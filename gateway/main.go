@@ -7,9 +7,10 @@ import (
 	"github.com/chakernet/ryuko/gateway/events"
 	"github.com/chakernet/ryuko/gateway/util"
 	"github.com/chakernet/ryuko/gateway/util/amqp"
+	"github.com/chakernet/ryuko/gateway/util/redis"
 	"github.com/diamondburned/arikawa/v3/gateway"
 	"github.com/diamondburned/arikawa/v3/session"
-	"github.com/diamondburned/arikawa/v3/utils/handler"
+	_redis "github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
 	_amqp "github.com/streadway/amqp"
 )
@@ -22,41 +23,51 @@ func main() {
 	log.Info("Initializing...")
 	// Load Env
 	err := godotenv.Load("../.env")
-	log.FatalOnError(err, "Failed to load env")
+	if err != nil {
+		log.Fatal("Failed to load env: ", err)
+	}
 	token := os.Getenv("BOT_TOKEN")
+	
+	// Connect to Redis
+	rdb := redis.Connect()
+	defer rdb.Close()
 
 	// Connect to rabbitmq
-	conn := amqp.Connect()
-	defer conn.Close()
-	ch := amqp.Channel(conn)
+	amconn := amqp.Connect()
+	defer amconn.Close()
+	ch := amqp.Channel(amconn)
 	defer ch.Close()
 
 	// Create Session
 	s, err := session.New("Bot " + token)
-	log.FatalOnError(err, "Failed to create session")
+	if err != nil {
+		log.Fatal("Failed to create session: ", err)
+	}
 
-	s.Handler = handler.New()
-	s.Handler.Synchronous = true
-	bindEvents(s, ch, &log)
+	bindEvents(s, ch, &log, rdb)
 
 	// Add the needed Gateway intents.
 	s.AddIntents(gateway.IntentGuildMessages)
 
 	// Open a new Session for events
 	err = s.Open(context.Background())
-	log.FatalOnError(err, "Failed to create session")
+	if err != nil {
+		log.Fatal("Failed to create connection: ", err)
+	}
 	defer s.Close()
 
 	// Get bot user
 	u, err := s.Me()
-	log.FatalOnError(err, "Failed to get bot user")
+	if err != nil {
+		log.Fatal("Failed to get user: ", err)
+	}
 	log.Info("Started as %s", u.Username)
 
 	// Block forever.
 	select {}
 }
 
-func bindEvents(s *session.Session, ch *_amqp.Channel, log *util.Logger) {
+func bindEvents(s *session.Session, ch *_amqp.Channel, log *util.Logger, rdb *_redis.Client) {
 	err := ch.ExchangeDeclare(
 		"events_topic",
 		"topic",
@@ -66,11 +77,14 @@ func bindEvents(s *session.Session, ch *_amqp.Channel, log *util.Logger) {
 		false,
 		nil,
 	)
-	log.FatalOnError(err, "Failed to declare an exchange")
+	if err != nil {
+		log.Fatal("Failed to declare an exchange: ", err)
+	}
 
 	handler := events.EventHandler {
 		Discord: s,
 		Channel: ch,
+		Redis: rdb,
 	}
 
 	s.AddHandler(handler.MessageCreate)
