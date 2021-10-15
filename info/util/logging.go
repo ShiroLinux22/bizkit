@@ -18,6 +18,18 @@ type Logger struct {
 	Name string
 }
 
+func (l *Logger) WarnOnError(err error, msg string) {
+	if err != nil {
+		l.Warn("%s: %s", msg, err)
+	}
+}
+
+func (l *Logger) FatalOnError(err error, msg string) {
+	if err != nil {
+		l.Fatal("%s: %s", msg, err)
+	}
+}
+
 func (l *Logger) Info(format string, a ...interface {}) {
 	var input string = fmt.Sprintf(format, a...)
 	currentTime := time.Now()

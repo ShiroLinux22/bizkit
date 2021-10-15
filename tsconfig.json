@@ -11,19 +11,8 @@
 		"strict": true,
 		"resolveJsonModule": true,
 		"esModuleInterop": true,
-		"forceConsistentCasingInFileNames": true,
-		"paths": {
-			"@ryukobot/common": ["common"]
-		}
+		"forceConsistentCasingInFileNames": true
 	},
-	"references": [
-		{
-			"path": "info"
-		},
-		{
-			"path": "common"
-		}
-	],
 	"include": ["src/**/*"],
 	"exclude": ["node_modules", "dist"]
 }

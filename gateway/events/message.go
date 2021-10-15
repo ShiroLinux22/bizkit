@@ -17,7 +17,7 @@ func (h *EventHandler) MessageCreate(e *gateway.MessageCreateEvent) {
 	redis.SetChannel(h.Redis, cha)
 	text := util.ToJson(e)
 
-	h.Channel.Publish(
+	err = h.Channel.Publish(
 		"events_topic",
 		"message.create",
 		false,
@@ -27,28 +27,8 @@ func (h *EventHandler) MessageCreate(e *gateway.MessageCreateEvent) {
 			Body: []byte(text),
 		},
 	)
-}
-
-func (h *EventHandler) MessageDelete(e *gateway.MessageDeleteEvent) {
-	// Get Message
-	m, err := h.Discord.Message(e.ChannelID, e.ID)
+	
 	if err != nil {
-		log.Error("Failed to get message:", err)
-
-		return
+		log.Error("Failed to send to RabbitMQ", err)
 	}
-
-	log.Info("Deleted: %s", m.Content)
-	text := util.ToJson(m)
-
-	h.Channel.Publish(
-		"events_topic",
-		"message.delete",
-		false,
-		false,
-		amqp.Publishing{
-			ContentType: "application/json",
-			Body: []byte(text),
-		},
-	)
 }
