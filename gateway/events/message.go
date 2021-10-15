@@ -8,8 +8,9 @@ import (
 func (h *EventHandler) MessageCreate(e *gateway.MessageCreateEvent) {
 	log.Info("Message: %s", e.Content)
 	text := toJson(e)
+	log.Info(text)
 
-	h.Channel.Publish(
+	err := h.Channel.Publish(
 		"events_topic",
 		"message.create",
 		false,
@@ -19,26 +20,8 @@ func (h *EventHandler) MessageCreate(e *gateway.MessageCreateEvent) {
 			Body: []byte(text),
 		},
 	)
-}
-
-func (h *EventHandler) MessageDelete(e *gateway.MessageDeleteEvent) {
-	// Get Message
-	m, err := h.Discord.Message(e.ChannelID, e.ID)
+	
 	if err != nil {
-		log.WarnOnError(err, "Message Not Found")
+		log.Error("Failed to send to RabbitMQ", err)
 	}
-
-	log.Info("Deleted: %s", m.Content)
-	text := toJson(m)
-
-	h.Channel.Publish(
-		"events_topic",
-		"message.delete",
-		false,
-		false,
-		amqp.Publishing{
-			ContentType: "application/json",
-			Body: []byte(text),
-		},
-	)
 }

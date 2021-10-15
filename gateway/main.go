@@ -9,7 +9,6 @@ import (
 	"github.com/chakernet/ryuko/gateway/util/amqp"
 	"github.com/diamondburned/arikawa/v3/gateway"
 	"github.com/diamondburned/arikawa/v3/session"
-	"github.com/diamondburned/arikawa/v3/utils/handler"
 	"github.com/joho/godotenv"
 	_amqp "github.com/streadway/amqp"
 )
@@ -35,8 +34,6 @@ func main() {
 	s, err := session.New("Bot " + token)
 	log.FatalOnError(err, "Failed to create session")
 
-	s.Handler = handler.New()
-	s.Handler.Synchronous = true
 	bindEvents(s, ch, &log)
 
 	// Add the needed Gateway intents.
