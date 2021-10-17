@@ -2,6 +2,7 @@ package util
 
 import (
 	"encoding/json"
+	"reflect"
 )
 
 func ToJson(i interface {}) (string, error) {
@@ -12,4 +13,8 @@ func ToJson(i interface {}) (string, error) {
 	text := string(formatted)
 
 	return text, nil
+}
+
+func IsZero(v reflect.Value) bool {
+	return !v.IsValid() || reflect.DeepEqual(v.Interface(), reflect.Zero(v.Type()).Interface())
 }

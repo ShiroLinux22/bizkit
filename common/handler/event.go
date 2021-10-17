@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/chakernet/ryuko/common/redis"
 	"github.com/diamondburned/arikawa/v3/session"
-	"github.com/go-redis/redis/v8"
 	"github.com/streadway/amqp"
 
 	"github.com/diamondburned/arikawa/v3/discord"
@@ -13,7 +13,48 @@ import (
 )
 
 type IEventHandler interface {
-	MessageCreate(*gateway.MessageCreateEvent) error;
+	// Message Events (GUILD_MESSAGES & DIRECT_MESSAGES)
+	MessageCreate(*gateway.MessageCreateEvent)                           error;
+	MessageUpdate(*gateway.MessageUpdateEvent)                           error;
+	MessageDelete(*gateway.MessageDeleteEvent)                           error;
+	MessageDeleteBulk(*gateway.MessageDeleteBulkEvent)                   error; // guild only
+
+	// Role Events (GUILDS)
+	GuildRoleCreate(*gateway.GuildRoleCreateEvent)                       error;
+	GuildRoleUpdate(*gateway.GuildRoleUpdateEvent)                       error;
+	GuildRoleDelete(*gateway.GuildRoleDeleteEvent)                       error;
+
+	// Guild Events (GUILDS)
+	GuildCreate(*gateway.GuildCreateEvent)                               error;
+	GuildUpdate(*gateway.GuildUpdateEvent)                               error;
+	GuildDelete(*gateway.GuildDeleteEvent)                               error;
+
+	// Channel Events (GUILDS)
+	ChannelCreate(*gateway.ChannelCreateEvent)                           error;
+	ChannelUpdate(*gateway.ChannelUpdateEvent)                           error;
+	ChannelDelete(*gateway.ChannelDeleteEvent)                           error;
+
+	// Member Events (GUILD_MEMBERS)
+	GuildMemberAdd(*gateway.GuildMemberAddEvent)                         error;
+	GuildMemberUpdate(*gateway.GuildMemberUpdateEvent)                   error;
+	GuildMemberRemove(*gateway.GuildMemberRemoveEvent)                   error;
+
+	// Ban Events (GUILD_BANS)
+	GuildBanAdd(*gateway.GuildBanAddEvent)                               error;
+	GuildBanRemove(*gateway.GuildBanRemoveEvent)                         error;
+
+	// Invite Events (GUILD_INVITES)
+	InviteCreate(*gateway.InviteCreateEvent)                             error;
+	InviteDelete(*gateway.InviteDeleteEvent)                             error;
+
+	// Voice State Events (GUILD_VOICE_STATES)
+	VoiceStateUpdate(*gateway.VoiceStateUpdateEvent)                     error;
+
+	// Guild Message Reactions Events (GUILD_MESSAGE_REACTIONS & DIRECT_MESSAGE_REACTIONS)
+	MessageReactionAdd(*gateway.MessageReactionAddEvent)                 error;
+	MessageReactionRemove(*gateway.MessageReactionRemoveEvent)           error;
+	MessageReactionRemoveAll(*gateway.MessageReactionRemoveAllEvent)     error;
+	MessageReactionRemoveEmoji(*gateway.MessageReactionRemoveEmojiEvent) error;
 }
 
 type EventHandler struct {
@@ -21,19 +62,18 @@ type EventHandler struct {
 
 	Channel *amqp.Channel
 	Discord *session.Session
-	Redis *redis.Client
+	Redis *redis.Redis
 }
 
 // R means 'reduced'
 type EventHandlerR struct {
 	Channel *amqp.Channel
 	Discord *session.Session
-	Redis *redis.Client
+	Redis *redis.Redis
 }
 
 type Event struct {
 	Type string `json:"type"`
-	Shard int `json:"shard,omitempty"`
 	Data string `json:"data,omitempty"`
 }
 
@@ -50,9 +90,14 @@ func (h *EventHandler) Handle(e Event) error {
 			return err
 		}
 
-		mem, err := h.Discord.Member(data.GuildID, data.Author.ID)
+		mem, err := h.Redis.GetMember(data.GuildID, data.Author.ID)
+		if mem == nil && err == nil {
+			mem, err = h.Discord.Member(data.GuildID, data.Author.ID)
 
-		if err != nil {
+			if err != nil {
+				return err
+			}
+		} else if err != nil {
 			return err
 		}
 
@@ -64,6 +109,39 @@ func (h *EventHandler) Handle(e Event) error {
 		if err != nil {
 			return err
 		}
+		break;
+
+	case "MESSAGE_UPDATE":
+		var data discord.Message
+
+		err := json.Unmarshal(raw, &data)
+
+		if err != nil {
+			return err
+		}
+
+		mem, err := h.Redis.GetMember(data.GuildID, data.Author.ID)
+		if mem == nil && err == nil {
+			mem, err = h.Discord.Member(data.GuildID, data.Author.ID)
+
+			if err != nil {
+				return err
+			}
+		} else if err != nil {
+			return err
+		}
+
+		err = h.MessageUpdate(&gateway.MessageUpdateEvent{
+			Message: data,
+			Member: mem,
+		})
+
+		if err != nil {
+			return err
+		}
+		break;
+
+	case "MESSAGE_DELETE":
 		break;
 
 	default:

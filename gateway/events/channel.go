@@ -1,29 +1,26 @@
 package events
 
 import (
-	"reflect"
-
 	"github.com/chakernet/ryuko/common/handler"
 	"github.com/chakernet/ryuko/common/util"
 	"github.com/diamondburned/arikawa/v3/gateway"
 	"github.com/streadway/amqp"
 )
 
-func (h *Handler) MessageCreate(m *gateway.MessageCreateEvent) {
-	// Add Message into Redis
-	err := h.Redis.SetMessage(&m.Message)
+func (h *Handler) ChannelCreate(c *gateway.ChannelCreateEvent) {
+	err := h.Redis.SetChannel(&c.Channel)
 	if err != nil {
-		log.Error("Failed to cache message: %s", err)
+		log.Error("Failed to cache channel: %s", err)
 		return
 	}
 
-	data, err := util.ToJson(m)
+	data, err := util.ToJson(c)
 	if err != nil {
 		log.Error("Failed to parse data to JSON: %s", err)
 		return
 	}
 	event := handler.Event {
-		Type: "MESSAGE_CREATE",
+		Type: "CHANNEL_CREATE",
 		Data: data,
 	}
 	payload, err := util.ToJson(event)
@@ -34,7 +31,7 @@ func (h *Handler) MessageCreate(m *gateway.MessageCreateEvent) {
 
 	err = h.Channel.Publish(
 		"events_topic",
-		"message.create",
+		"channel.create",
 		false,
 		false,
 		amqp.Publishing{
@@ -49,33 +46,20 @@ func (h *Handler) MessageCreate(m *gateway.MessageCreateEvent) {
 	}
 }
 
-func (h *Handler) MessageUpdate(m *gateway.MessageUpdateEvent) {
-	cached, err := h.Redis.GetMessage(m.ID)
+func (h *Handler) ChannelUpdate(c *gateway.ChannelUpdateEvent) {
+	err := h.Redis.SetChannel(&c.Channel)
 	if err != nil {
-		log.Error("Failed to get cached message: %s", err)
-	}
-
-	// We would like to assume that redis is the source of truth.
-	// This *should* be okay to assume in case of some weird
-	// edge case where a channel isn't present in local cache
-	if util.IsZero(reflect.ValueOf(cached)) {
-		cached = &m.Message
-	}
-
-	// Add Message into Redis
-	err = h.Redis.SetMessage(&m.Message)
-	if err != nil {
-		log.Error("Failed to cache message: %s", err)
+		log.Error("Failed to cache channel: %s", err)
 		return
 	}
 
-	data, err := util.ToJson(cached)
+	data, err := util.ToJson(c)
 	if err != nil {
 		log.Error("Failed to parse data to JSON: %s", err)
 		return
 	}
 	event := handler.Event {
-		Type: "MESSAGE_UPDATE",
+		Type: "CHANNEL_UPDATE",
 		Data: data,
 	}
 	payload, err := util.ToJson(event)
@@ -86,7 +70,7 @@ func (h *Handler) MessageUpdate(m *gateway.MessageUpdateEvent) {
 
 	err = h.Channel.Publish(
 		"events_topic",
-		"message.update",
+		"channel.update",
 		false,
 		false,
 		amqp.Publishing{
@@ -101,26 +85,31 @@ func (h *Handler) MessageUpdate(m *gateway.MessageUpdateEvent) {
 	}
 }
 
-func (h *Handler) MessageDelete(m *gateway.MessageDeleteEvent) {
-	cached, err := h.Redis.GetMessage(m.ID)
-	if err != nil {
-		log.Error("Failed to get cached message: %s", err)
+func (h *Handler) ChannelDelete(c *gateway.ChannelDeleteEvent) {
+	chann, err := h.Redis.GetChannel(c.ID)
+	if chann == nil && err == nil {
+		chann, err = h.Discord.Channel(c.ID)
+
+		if err != nil {
+			return 
+		}
+	} else if err != nil {
+		return 
 	}
 
-	// Add Message into Redis
-	err = h.Redis.DeleteMessage(m.ID)
+	err = h.Redis.DeleteChannel(c.ID)
 	if err != nil {
-		log.Error("Failed to delete message: %s", err)
+		log.Error("Failed to delete cached channel: %s", err)
 		return
 	}
 
-	data, err := util.ToJson(cached)
+	data, err := util.ToJson(chann)
 	if err != nil {
 		log.Error("Failed to parse data to JSON: %s", err)
 		return
 	}
 	event := handler.Event {
-		Type: "MESSAGE_DELETE",
+		Type: "CHANNEL_DELETE",
 		Data: data,
 	}
 	payload, err := util.ToJson(event)
@@ -131,7 +120,7 @@ func (h *Handler) MessageDelete(m *gateway.MessageDeleteEvent) {
 
 	err = h.Channel.Publish(
 		"events_topic",
-		"message.delete",
+		"channel.delete",
 		false,
 		false,
 		amqp.Publishing{

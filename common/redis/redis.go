@@ -11,8 +11,11 @@ var (
 	ctx = context.Background()
 )
 
+type Redis struct {
+	Client *redis.Client
+}
 
-func Connect() *redis.Client {
+func (r *Redis) Connect() *redis.Client {
 	uri := os.Getenv("REDIS_URI")
 	auth := os.Getenv("REDIS_AUTH")
 
@@ -22,5 +25,6 @@ func Connect() *redis.Client {
 		DB: 0,
 	})
 
+	r.Client = client
 	return client
 }

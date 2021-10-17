@@ -10,13 +10,12 @@ import (
 	"github.com/chakernet/ryuko/common/util"
 	"github.com/chakernet/ryuko/info/events"
 	"github.com/diamondburned/arikawa/v3/session"
-	_redis "github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
 	_amqp "github.com/streadway/amqp"
 )
 
 var (
-	log = util.Logger {
+	log = util.Logger{
 		Name: "main",
 	}
 )
@@ -31,7 +30,8 @@ func main() {
 	token := os.Getenv("BOT_TOKEN")
 
 	// Connect to redis
-	redconn := redis.Connect()
+	rdb := redis.Redis{}
+	redconn := rdb.Connect()
 	defer redconn.Close()
 	log.Info("Initialized Redis Connection")
 
@@ -55,17 +55,17 @@ func main() {
 	}
 	defer s.Close()
 
-	bindEvents(s, ch, redconn)
+	bindEvents(s, ch, &rdb)
 
 	select {}
 }
 
-func bindEvents(sess *session.Session, ch *_amqp.Channel, redis *_redis.Client) {
-	_handler := &events.Handler {
+func bindEvents(sess *session.Session, ch *_amqp.Channel, redis *redis.Redis) {
+	_handler := &events.Handler{
 		EventHandler: handler.EventHandler{
 			Discord: sess,
 			Channel: ch,
-			Redis: redis,
+			Redis:   redis,
 		},
 	}
 	_handler.IEventHandler = _handler
@@ -85,7 +85,7 @@ func bindEvents(sess *session.Session, ch *_amqp.Channel, redis *_redis.Client) 
 
 	err = ch.QueueBind(
 		q.Name,
-		"message.create",
+		"message.*",
 		"events_topic",
 		false,
 		nil,

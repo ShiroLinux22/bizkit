@@ -8,10 +8,10 @@ import (
 	"github.com/diamondburned/arikawa/v3/discord"
 )
 
-func (r *Redis) SetChannel(c *discord.Channel) error {
-	key := fmt.Sprintf("channels:%s", c.ID.String())
+func (r *Redis) SetMessage(m *discord.Message) error {
+	key := fmt.Sprintf("messages:%s", m.ID.String())
 
-	data, err := util.ToJson(c)
+	data, err := util.ToJson(m)
 	if err != nil {
 		return err
 	}
@@ -24,8 +24,8 @@ func (r *Redis) SetChannel(c *discord.Channel) error {
 	return nil
 }
 
-func (r *Redis) GetChannel(id discord.ChannelID) (*discord.Channel, error)  {
-	key := fmt.Sprintf("channels:%s", id.String())
+func (r *Redis) GetMessage(id discord.MessageID) (*discord.Message, error)  {
+	key := fmt.Sprintf("messages:%s", id.String())
 	cmd := r.Client.Do(ctx, "JSON.GET", key, ".")
 
 	if cmd.Err() != nil {
@@ -41,15 +41,15 @@ func (r *Redis) GetChannel(id discord.ChannelID) (*discord.Channel, error)  {
 	}
 	bytes := []byte(text)
 
-	var channel discord.Channel
+	var message discord.Message
 
-	json.Unmarshal(bytes, &channel)
+	json.Unmarshal(bytes, &message)
 
 	return nil, nil
 }
 
-func (r *Redis) DeleteChannel(id discord.ChannelID) error  {
-	key := fmt.Sprintf("channels:%s", id.String())
+func (r *Redis) DeleteMessage(id discord.MessageID) error  {
+	key := fmt.Sprintf("messages:%s", id.String())
 	cmd := r.Client.Do(ctx, "JSON.DEL", key, ".")
 
 	if cmd.Err() != nil {

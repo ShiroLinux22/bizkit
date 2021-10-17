@@ -8,10 +8,10 @@ import (
 	"github.com/diamondburned/arikawa/v3/discord"
 )
 
-func (r *Redis) SetChannel(c *discord.Channel) error {
-	key := fmt.Sprintf("channels:%s", c.ID.String())
+func (r *Redis) SetMember(id discord.GuildID, m *discord.Member) error {
+	key := fmt.Sprintf("members:%s:%s", id.String(), m.User.ID.String())
 
-	data, err := util.ToJson(c)
+	data, err := util.ToJson(m)
 	if err != nil {
 		return err
 	}
@@ -24,8 +24,8 @@ func (r *Redis) SetChannel(c *discord.Channel) error {
 	return nil
 }
 
-func (r *Redis) GetChannel(id discord.ChannelID) (*discord.Channel, error)  {
-	key := fmt.Sprintf("channels:%s", id.String())
+func (r *Redis) GetMember(gId discord.GuildID, uId discord.UserID) (*discord.Member, error)  {
+	key := fmt.Sprintf("members:%s:%s", gId.String(), uId.String())
 	cmd := r.Client.Do(ctx, "JSON.GET", key, ".")
 
 	if cmd.Err() != nil {
@@ -41,15 +41,15 @@ func (r *Redis) GetChannel(id discord.ChannelID) (*discord.Channel, error)  {
 	}
 	bytes := []byte(text)
 
-	var channel discord.Channel
+	var member discord.Member
 
-	json.Unmarshal(bytes, &channel)
+	json.Unmarshal(bytes, &member)
 
-	return nil, nil
+	return &member, nil
 }
 
-func (r *Redis) DeleteChannel(id discord.ChannelID) error  {
-	key := fmt.Sprintf("channels:%s", id.String())
+func (r *Redis) DeleteMember(gId discord.GuildID, uId discord.UserID) error  {
+	key := fmt.Sprintf("members:%s:%s", gId.String(), uId.String())
 	cmd := r.Client.Do(ctx, "JSON.DEL", key, ".")
 
 	if cmd.Err() != nil {

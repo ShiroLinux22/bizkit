@@ -11,7 +11,6 @@ import (
 	"github.com/chakernet/ryuko/gateway/events"
 	"github.com/diamondburned/arikawa/v3/gateway"
 	"github.com/diamondburned/arikawa/v3/session"
-	_redis "github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
 	_amqp "github.com/streadway/amqp"
 )
@@ -30,8 +29,9 @@ func main() {
 	token := os.Getenv("BOT_TOKEN")
 	
 	// Connect to Redis
-	rdb := redis.Connect()
-	defer rdb.Close()
+	rdb := redis.Redis {}
+	client := rdb.Connect()
+	defer client.Close()
 	log.Info("Connected to Redis")
 
 	// Connect to rabbitmq
@@ -53,10 +53,16 @@ func main() {
 		log.Fatal("Failed to create session: ", err)
 	}
 
-	bindEvents(s, ch, &log, rdb)
+	bindEvents(s, ch, &log, &rdb)
 
 	// Add the needed Gateway intents.
+	s.AddIntents(gateway.IntentGuilds)
 	s.AddIntents(gateway.IntentGuildMessages)
+	s.AddIntents(gateway.IntentGuildMembers)
+	s.AddIntents(gateway.IntentGuildBans)
+	s.AddIntents(gateway.IntentGuildInvites)
+	s.AddIntents(gateway.IntentGuildVoiceStates)
+	s.AddIntents(gateway.IntentDirectMessageReactions)
 
 	// Open a new Session for events
 	err = s.Open(context.Background())
@@ -76,7 +82,7 @@ func main() {
 	select {}
 }
 
-func bindEvents(s *session.Session, ch *_amqp.Channel, log *util.Logger, rdb *_redis.Client) {
+func bindEvents(s *session.Session, ch *_amqp.Channel, log *util.Logger, rdb *redis.Redis) {
 	err := ch.ExchangeDeclare(
 		"events_topic",
 		"topic",
@@ -98,5 +104,13 @@ func bindEvents(s *session.Session, ch *_amqp.Channel, log *util.Logger, rdb *_r
 		},
 	}
 
+	// Message Events (GUILD_MESSAGES & DIRECT_MESSAGES)
 	s.AddHandler(handler.MessageCreate)
+	s.AddHandler(handler.MessageUpdate)
+	s.AddHandler(handler.MessageDelete)
+
+	// Channel Events (GUILDS)
+	s.AddHandler(handler.ChannelCreate)
+	s.AddHandler(handler.ChannelUpdate)
+	s.AddHandler(handler.ChannelDelete)
 }
