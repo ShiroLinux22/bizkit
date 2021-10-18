@@ -1,0 +1,8 @@
+{
+	"name": "@ryukobot/api",
+	"private": true,
+	"main": "dist/index.js",
+	"scripts": {
+		"start": "node ."
+	}
+}

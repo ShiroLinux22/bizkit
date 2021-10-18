@@ -1,0 +1,23 @@
+{
+	"compilerOptions": {
+		"incremental": true,
+		"moduleResolution": "node",
+		"target": "es2017",
+		"module": "esnext",
+		"baseUrl": ".",
+		"rootDir": ".",
+		"outDir": "./dist",
+		"sourceMap": true,
+		"strict": true,
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true
+	},
+	"references": [
+		{
+			"path": "api"
+		}
+	],
+	"include": ["src/**/*"],
+	"exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,22 @@
+{
+	"name": "ryuko",
+	"version": "3.0.0",
+	"private": true,
+	"repository": "https://github.com/chakernet/ryuko",
+	"scripts": {
+		"build": "tsc -b",
+		"format": "prettier --write ."
+	},
+	"author": "Jack C <jack@chaker.net>",
+	"license": "GPL-3.0",
+	"devDependencies": {
+		"@types/node": "^16.11.1",
+		"prettier": "^2.4.1",
+		"typescript": "^4.4.4"
+	},
+	"workspaces": {
+		"packages": [
+			"api"
+		]
+	}
+}
