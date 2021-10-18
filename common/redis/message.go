@@ -1,6 +1,6 @@
 /*
 	Caching function(s) for messages
-    Copyright (C) 2021 jacany <jack@chaker.net>
+    Copyright (C) 2021 Jack C <jack@chaker.net>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
