@@ -1,5 +1,5 @@
 /*
-	Main file for the info module
+	Main file for the logging module
     Copyright (C) 2021 Jack C <jack@chaker.net>
 
     This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ import (
 	"github.com/chakernet/ryuko/common/handler"
 	"github.com/chakernet/ryuko/common/redis"
 	"github.com/chakernet/ryuko/common/util"
-	"github.com/chakernet/ryuko/info/events"
+	"github.com/chakernet/ryuko/logging/events"
 	"github.com/diamondburned/arikawa/v3/session"
 	"github.com/joho/godotenv"
 	_amqp "github.com/streadway/amqp"
@@ -89,7 +89,7 @@ func bindEvents(sess *session.Session, ch *_amqp.Channel, redis *redis.Redis) {
 	_handler.IEventHandler = _handler
 
 	q, err := ch.QueueDeclare(
-		"info_events",
+		"logging_events",
 		true,
 		false,
 		false,

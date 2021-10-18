@@ -1,5 +1,5 @@
 /*
-	Handler(s) for message-related events
+	Basic event handler struct(s)
     Copyright (C) 2021 Jack C <jack@chaker.net>
 
     This program is free software: you can redistribute it and/or modify
@@ -19,22 +19,9 @@
 package events
 
 import (
-	"os"
-	"strings"
-
-	"github.com/diamondburned/arikawa/v3/gateway"
+	"github.com/chakernet/ryuko/common/handler"
 )
 
-func (h *Handler) MessageCreate(m *gateway.MessageCreateEvent) error {
-	if m.Author.Bot {
-		return nil
-	}
-
-	if !strings.HasPrefix(m.Content, os.Getenv("BOT_PREFIX")) {
-		return nil
-	}
-
-	h.Discord.SendTextReply(m.ChannelID, "LMAO", m.ID)
-
-	return nil
+type Handler struct {
+	handler.EventHandler;
 }
