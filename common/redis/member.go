@@ -36,13 +36,13 @@ func (r *Redis) SetMember(id discord.GuildID, m *discord.Member) error {
 
 	cmd := r.Client.Do(ctx, "JSON.SET", key, ".", data)
 	if cmd.Err() != nil {
-		return cmd.Err();
+		return cmd.Err()
 	}
 
 	return nil
 }
 
-func (r *Redis) GetMember(gId discord.GuildID, uId discord.UserID) (*discord.Member, error)  {
+func (r *Redis) GetMember(gId discord.GuildID, uId discord.UserID) (*discord.Member, error) {
 	key := fmt.Sprintf("members:%s:%s", gId.String(), uId.String())
 	cmd := r.Client.Do(ctx, "JSON.GET", key, ".")
 
@@ -50,12 +50,12 @@ func (r *Redis) GetMember(gId discord.GuildID, uId discord.UserID) (*discord.Mem
 		if cmd.Err().Error() == "redis: nil" {
 			return nil, nil
 		}
-		return nil, cmd.Err();
+		return nil, cmd.Err()
 	}
 
 	text, err := cmd.Text()
 	if err != nil {
-		return nil, err;
+		return nil, err
 	}
 	bytes := []byte(text)
 
@@ -66,12 +66,12 @@ func (r *Redis) GetMember(gId discord.GuildID, uId discord.UserID) (*discord.Mem
 	return &member, nil
 }
 
-func (r *Redis) DeleteMember(gId discord.GuildID, uId discord.UserID) error  {
+func (r *Redis) DeleteMember(gId discord.GuildID, uId discord.UserID) error {
 	key := fmt.Sprintf("members:%s:%s", gId.String(), uId.String())
 	cmd := r.Client.Do(ctx, "JSON.DEL", key, ".")
 
 	if cmd.Err() != nil {
-		return cmd.Err();
+		return cmd.Err()
 	}
 
 	return nil

@@ -23,7 +23,7 @@ import (
 	"reflect"
 )
 
-func ToJson(i interface {}) (string, error) {
+func ToJson(i interface{}) (string, error) {
 	formatted, err := json.Marshal(i)
 	if err != nil {
 		return "", err

@@ -37,7 +37,7 @@ func (h *Handler) ChannelCreate(c *gateway.ChannelCreateEvent) {
 		log.Error("Failed to parse data to JSON: %s", err)
 		return
 	}
-	event := handler.Event {
+	event := handler.Event{
 		Type: "CHANNEL_CREATE",
 		Data: data,
 	}
@@ -54,10 +54,10 @@ func (h *Handler) ChannelCreate(c *gateway.ChannelCreateEvent) {
 		false,
 		amqp.Publishing{
 			ContentType: "application/json",
-			Body: []byte(payload),
+			Body:        []byte(payload),
 		},
 	)
-	
+
 	if err != nil {
 		log.Error("Failed to send to RabbitMQ: %s", err)
 		return
@@ -76,7 +76,7 @@ func (h *Handler) ChannelUpdate(c *gateway.ChannelUpdateEvent) {
 		log.Error("Failed to parse data to JSON: %s", err)
 		return
 	}
-	event := handler.Event {
+	event := handler.Event{
 		Type: "CHANNEL_UPDATE",
 		Data: data,
 	}
@@ -93,10 +93,10 @@ func (h *Handler) ChannelUpdate(c *gateway.ChannelUpdateEvent) {
 		false,
 		amqp.Publishing{
 			ContentType: "application/json",
-			Body: []byte(payload),
+			Body:        []byte(payload),
 		},
 	)
-	
+
 	if err != nil {
 		log.Error("Failed to send to RabbitMQ: %s", err)
 		return
@@ -109,10 +109,10 @@ func (h *Handler) ChannelDelete(c *gateway.ChannelDeleteEvent) {
 		chann, err = h.Discord.Channel(c.ID)
 
 		if err != nil {
-			return 
+			return
 		}
 	} else if err != nil {
-		return 
+		return
 	}
 
 	err = h.Redis.DeleteChannel(c.ID)
@@ -126,7 +126,7 @@ func (h *Handler) ChannelDelete(c *gateway.ChannelDeleteEvent) {
 		log.Error("Failed to parse data to JSON: %s", err)
 		return
 	}
-	event := handler.Event {
+	event := handler.Event{
 		Type: "CHANNEL_DELETE",
 		Data: data,
 	}
@@ -143,10 +143,10 @@ func (h *Handler) ChannelDelete(c *gateway.ChannelDeleteEvent) {
 		false,
 		amqp.Publishing{
 			ContentType: "application/json",
-			Body: []byte(payload),
+			Body:        []byte(payload),
 		},
 	)
-	
+
 	if err != nil {
 		log.Error("Failed to send to RabbitMQ: %s", err)
 		return

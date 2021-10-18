@@ -32,47 +32,47 @@ import (
 
 type IEventHandler interface {
 	// Message Events (GUILD_MESSAGES & DIRECT_MESSAGES)
-	MessageCreate(*gateway.MessageCreateEvent)                           error;
-	MessageUpdate(*gateway.MessageUpdateEvent)                           error;
-	MessageDelete(*gateway.MessageDeleteEvent)                           error;
-	MessageDeleteBulk(*gateway.MessageDeleteBulkEvent)                   error; // guild only
+	MessageCreate(*gateway.MessageCreateEvent) error
+	MessageUpdate(*gateway.MessageUpdateEvent) error
+	MessageDelete(*gateway.MessageDeleteEvent) error
+	MessageDeleteBulk(*gateway.MessageDeleteBulkEvent) error // guild only
 
 	// Role Events (GUILDS)
-	GuildRoleCreate(*gateway.GuildRoleCreateEvent)                       error;
-	GuildRoleUpdate(*gateway.GuildRoleUpdateEvent)                       error;
-	GuildRoleDelete(*gateway.GuildRoleDeleteEvent)                       error;
+	GuildRoleCreate(*gateway.GuildRoleCreateEvent) error
+	GuildRoleUpdate(*gateway.GuildRoleUpdateEvent) error
+	GuildRoleDelete(*gateway.GuildRoleDeleteEvent) error
 
 	// Guild Events (GUILDS)
-	GuildCreate(*gateway.GuildCreateEvent)                               error;
-	GuildUpdate(*gateway.GuildUpdateEvent)                               error;
-	GuildDelete(*gateway.GuildDeleteEvent)                               error;
+	GuildCreate(*gateway.GuildCreateEvent) error
+	GuildUpdate(*gateway.GuildUpdateEvent) error
+	GuildDelete(*gateway.GuildDeleteEvent) error
 
 	// Channel Events (GUILDS)
-	ChannelCreate(*gateway.ChannelCreateEvent)                           error;
-	ChannelUpdate(*gateway.ChannelUpdateEvent)                           error;
-	ChannelDelete(*gateway.ChannelDeleteEvent)                           error;
+	ChannelCreate(*gateway.ChannelCreateEvent) error
+	ChannelUpdate(*gateway.ChannelUpdateEvent) error
+	ChannelDelete(*gateway.ChannelDeleteEvent) error
 
 	// Member Events (GUILD_MEMBERS)
-	GuildMemberAdd(*gateway.GuildMemberAddEvent)                         error;
-	GuildMemberUpdate(*gateway.GuildMemberUpdateEvent)                   error;
-	GuildMemberRemove(*gateway.GuildMemberRemoveEvent)                   error;
+	GuildMemberAdd(*gateway.GuildMemberAddEvent) error
+	GuildMemberUpdate(*gateway.GuildMemberUpdateEvent) error
+	GuildMemberRemove(*gateway.GuildMemberRemoveEvent) error
 
 	// Ban Events (GUILD_BANS)
-	GuildBanAdd(*gateway.GuildBanAddEvent)                               error;
-	GuildBanRemove(*gateway.GuildBanRemoveEvent)                         error;
+	GuildBanAdd(*gateway.GuildBanAddEvent) error
+	GuildBanRemove(*gateway.GuildBanRemoveEvent) error
 
 	// Invite Events (GUILD_INVITES)
-	InviteCreate(*gateway.InviteCreateEvent)                             error;
-	InviteDelete(*gateway.InviteDeleteEvent)                             error;
+	InviteCreate(*gateway.InviteCreateEvent) error
+	InviteDelete(*gateway.InviteDeleteEvent) error
 
 	// Voice State Events (GUILD_VOICE_STATES)
-	VoiceStateUpdate(*gateway.VoiceStateUpdateEvent)                     error;
+	VoiceStateUpdate(*gateway.VoiceStateUpdateEvent) error
 
 	// Guild Message Reactions Events (GUILD_MESSAGE_REACTIONS & DIRECT_MESSAGE_REACTIONS)
-	MessageReactionAdd(*gateway.MessageReactionAddEvent)                 error;
-	MessageReactionRemove(*gateway.MessageReactionRemoveEvent)           error;
-	MessageReactionRemoveAll(*gateway.MessageReactionRemoveAllEvent)     error;
-	MessageReactionRemoveEmoji(*gateway.MessageReactionRemoveEmojiEvent) error;
+	MessageReactionAdd(*gateway.MessageReactionAddEvent) error
+	MessageReactionRemove(*gateway.MessageReactionRemoveEvent) error
+	MessageReactionRemoveAll(*gateway.MessageReactionRemoveAllEvent) error
+	MessageReactionRemoveEmoji(*gateway.MessageReactionRemoveEmojiEvent) error
 }
 
 type EventHandler struct {
@@ -80,14 +80,14 @@ type EventHandler struct {
 
 	Channel *amqp.Channel
 	Discord *session.Session
-	Redis *redis.Redis
+	Redis   *redis.Redis
 }
 
 // R means 'reduced'
 type EventHandlerR struct {
 	Channel *amqp.Channel
 	Discord *session.Session
-	Redis *redis.Redis
+	Redis   *redis.Redis
 }
 
 type Event struct {
@@ -121,13 +121,13 @@ func (h *EventHandler) Handle(e Event) error {
 
 		err = h.MessageCreate(&gateway.MessageCreateEvent{
 			Message: data,
-			Member: mem,
+			Member:  mem,
 		})
 
 		if err != nil {
 			return err
 		}
-		break;
+		break
 
 	case "MESSAGE_UPDATE":
 		var data discord.Message
@@ -151,16 +151,16 @@ func (h *EventHandler) Handle(e Event) error {
 
 		err = h.MessageUpdate(&gateway.MessageUpdateEvent{
 			Message: data,
-			Member: mem,
+			Member:  mem,
 		})
 
 		if err != nil {
 			return err
 		}
-		break;
+		break
 
 	case "MESSAGE_DELETE":
-		break;
+		break
 
 	default:
 		return errors.New("invalid event")

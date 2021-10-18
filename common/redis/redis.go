@@ -38,9 +38,9 @@ func (r *Redis) Connect() *redis.Client {
 	auth := os.Getenv("REDIS_AUTH")
 
 	client := redis.NewClient(&redis.Options{
-		Addr: uri,
+		Addr:     uri,
 		Password: auth,
-		DB: 0,
+		DB:       0,
 	})
 
 	r.Client = client

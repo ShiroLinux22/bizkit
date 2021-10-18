@@ -24,11 +24,11 @@ import (
 )
 
 var (
-	log = util.Logger {
+	log = util.Logger{
 		Name: "EventHandler",
 	}
 )
 
 type Handler struct {
-	handler.EventHandlerR;
+	handler.EventHandlerR
 }

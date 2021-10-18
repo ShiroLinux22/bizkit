@@ -40,7 +40,7 @@ func (h *Handler) MessageCreate(m *gateway.MessageCreateEvent) {
 		log.Error("Failed to parse data to JSON: %s", err)
 		return
 	}
-	event := handler.Event {
+	event := handler.Event{
 		Type: "MESSAGE_CREATE",
 		Data: data,
 	}
@@ -57,10 +57,10 @@ func (h *Handler) MessageCreate(m *gateway.MessageCreateEvent) {
 		false,
 		amqp.Publishing{
 			ContentType: "application/json",
-			Body: []byte(payload),
+			Body:        []byte(payload),
 		},
 	)
-	
+
 	if err != nil {
 		log.Error("Failed to send to RabbitMQ: %s", err)
 		return
@@ -92,7 +92,7 @@ func (h *Handler) MessageUpdate(m *gateway.MessageUpdateEvent) {
 		log.Error("Failed to parse data to JSON: %s", err)
 		return
 	}
-	event := handler.Event {
+	event := handler.Event{
 		Type: "MESSAGE_UPDATE",
 		Data: data,
 	}
@@ -109,10 +109,10 @@ func (h *Handler) MessageUpdate(m *gateway.MessageUpdateEvent) {
 		false,
 		amqp.Publishing{
 			ContentType: "application/json",
-			Body: []byte(payload),
+			Body:        []byte(payload),
 		},
 	)
-	
+
 	if err != nil {
 		log.Error("Failed to send to RabbitMQ: %s", err)
 		return
@@ -137,7 +137,7 @@ func (h *Handler) MessageDelete(m *gateway.MessageDeleteEvent) {
 		log.Error("Failed to parse data to JSON: %s", err)
 		return
 	}
-	event := handler.Event {
+	event := handler.Event{
 		Type: "MESSAGE_DELETE",
 		Data: data,
 	}
@@ -154,10 +154,10 @@ func (h *Handler) MessageDelete(m *gateway.MessageDeleteEvent) {
 		false,
 		amqp.Publishing{
 			ContentType: "application/json",
-			Body: []byte(payload),
+			Body:        []byte(payload),
 		},
 	)
-	
+
 	if err != nil {
 		log.Error("Failed to send to RabbitMQ: %s", err)
 		return

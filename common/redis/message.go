@@ -36,13 +36,13 @@ func (r *Redis) SetMessage(m *discord.Message) error {
 
 	cmd := r.Client.Do(ctx, "JSON.SET", key, ".", data)
 	if cmd.Err() != nil {
-		return cmd.Err();
+		return cmd.Err()
 	}
 
 	return nil
 }
 
-func (r *Redis) GetMessage(id discord.MessageID) (*discord.Message, error)  {
+func (r *Redis) GetMessage(id discord.MessageID) (*discord.Message, error) {
 	key := fmt.Sprintf("messages:%s", id.String())
 	cmd := r.Client.Do(ctx, "JSON.GET", key, ".")
 
@@ -50,12 +50,12 @@ func (r *Redis) GetMessage(id discord.MessageID) (*discord.Message, error)  {
 		if cmd.Err().Error() == "redis: nil" {
 			return nil, nil
 		}
-		return nil, cmd.Err();
+		return nil, cmd.Err()
 	}
 
 	text, err := cmd.Text()
 	if err != nil {
-		return nil, err;
+		return nil, err
 	}
 	bytes := []byte(text)
 
@@ -66,12 +66,12 @@ func (r *Redis) GetMessage(id discord.MessageID) (*discord.Message, error)  {
 	return nil, nil
 }
 
-func (r *Redis) DeleteMessage(id discord.MessageID) error  {
+func (r *Redis) DeleteMessage(id discord.MessageID) error {
 	key := fmt.Sprintf("messages:%s", id.String())
 	cmd := r.Client.Do(ctx, "JSON.DEL", key, ".")
 
 	if cmd.Err() != nil {
-		return cmd.Err();
+		return cmd.Err()
 	}
 
 	return nil

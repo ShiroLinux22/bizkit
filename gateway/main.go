@@ -34,7 +34,7 @@ import (
 )
 
 func main() {
-	log := util.Logger {
+	log := util.Logger{
 		Name: "main",
 	}
 
@@ -45,9 +45,9 @@ func main() {
 		log.Fatal("Failed to load env: ", err)
 	}
 	token := os.Getenv("BOT_TOKEN")
-	
+
 	// Connect to Redis
-	rdb := redis.Redis {}
+	rdb := redis.Redis{}
 	client := rdb.Connect()
 	defer client.Close()
 	log.Info("Connected to Redis")
@@ -114,11 +114,11 @@ func bindEvents(s *session.Session, ch *_amqp.Channel, log *util.Logger, rdb *re
 		log.Fatal("Failed to declare an exchange: ", err)
 	}
 
-	handler := events.Handler {
+	handler := events.Handler{
 		EventHandlerR: handler.EventHandlerR{
 			Discord: s,
 			Channel: ch,
-			Redis: rdb,
+			Redis:   rdb,
 		},
 	}
 

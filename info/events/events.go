@@ -23,5 +23,5 @@ import (
 )
 
 type Handler struct {
-	handler.EventHandler;
+	handler.EventHandler
 }

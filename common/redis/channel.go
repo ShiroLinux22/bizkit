@@ -36,13 +36,13 @@ func (r *Redis) SetChannel(c *discord.Channel) error {
 
 	cmd := r.Client.Do(ctx, "JSON.SET", key, ".", data)
 	if cmd.Err() != nil {
-		return cmd.Err();
+		return cmd.Err()
 	}
 
 	return nil
 }
 
-func (r *Redis) GetChannel(id discord.ChannelID) (*discord.Channel, error)  {
+func (r *Redis) GetChannel(id discord.ChannelID) (*discord.Channel, error) {
 	key := fmt.Sprintf("channels:%s", id.String())
 	cmd := r.Client.Do(ctx, "JSON.GET", key, ".")
 
@@ -50,12 +50,12 @@ func (r *Redis) GetChannel(id discord.ChannelID) (*discord.Channel, error)  {
 		if cmd.Err().Error() == "redis: nil" {
 			return nil, nil
 		}
-		return nil, cmd.Err();
+		return nil, cmd.Err()
 	}
 
 	text, err := cmd.Text()
 	if err != nil {
-		return nil, err;
+		return nil, err
 	}
 	bytes := []byte(text)
 
@@ -66,12 +66,12 @@ func (r *Redis) GetChannel(id discord.ChannelID) (*discord.Channel, error)  {
 	return nil, nil
 }
 
-func (r *Redis) DeleteChannel(id discord.ChannelID) error  {
+func (r *Redis) DeleteChannel(id discord.ChannelID) error {
 	key := fmt.Sprintf("channels:%s", id.String())
 	cmd := r.Client.Do(ctx, "JSON.DEL", key, ".")
 
 	if cmd.Err() != nil {
-		return cmd.Err();
+		return cmd.Err()
 	}
 
 	return nil

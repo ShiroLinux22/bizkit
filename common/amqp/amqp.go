@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	log = util.Logger {
+	log = util.Logger{
 		Name: "amqp",
 	}
 )
