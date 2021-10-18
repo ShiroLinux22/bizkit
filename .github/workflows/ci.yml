@@ -49,7 +49,7 @@ jobs:
         cache: "yarn"
         
     - name: Install Dependencies
-      run: .yarn --immutable
+      run: yarn --immutable
 
     - name: Build
-      run: .yarn build
+      run: yarn build
