@@ -49,7 +49,7 @@ jobs:
         cache: yarn
         
     - name: Install Dependencies
-      run: yarn --immutable
+      run: .yarn/releases/yarn-stable-temp.cjs --immutable
 
     - name: Build
-      run: yarn build
+      run: .yarn/releases/yarn-stable-temp.cjs build
