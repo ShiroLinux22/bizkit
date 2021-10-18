@@ -47,6 +47,9 @@ jobs:
       with:
         node-version: 14.x
         cache: yarn
+        
+    - name: Install Dependencies
+      run: yarn --immutable
 
     - name: Build
       run: yarn build
