@@ -1,4 +1,4 @@
-name: Create and publish a Docker image
+name: Push Docker Image
 
 on:
     push:
@@ -7,10 +7,9 @@ on:
 
 env:
     REGISTRY: ghcr.io
-    IMAGE_NAME: bizkit
 
 jobs:
-    build-and-push-image:
+    build-and-push:
         runs-on: ubuntu-latest
         permissions:
             contents: read
@@ -34,7 +33,7 @@ jobs:
               id: meta
               uses: docker/metadata-action@v2
               with:
-                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.path }}
+                  images: ${{ env.REGISTRY }}/${{ matrix.path }}
 
             - name: Build and push Docker image
               uses: docker/build-push-action@v2
