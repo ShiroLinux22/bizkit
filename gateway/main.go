@@ -42,7 +42,7 @@ func main() {
 	// Load Env
 	err := godotenv.Load("../.env")
 	if err != nil {
-		log.Fatal("Failed to load env: ", err)
+		log.Error("Failed to load env, assuming prod: ", err)
 	}
 	token := os.Getenv("BOT_TOKEN")
 
