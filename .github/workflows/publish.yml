@@ -35,4 +35,4 @@ jobs:
               with:
                   file: ${{ matrix.path }}/Dockerfile
                   push: true
-                  tags: chakernet/${{ env.IMAGE_NAME }}-${{ matrix.path }}:latest
+                  tags: ${{ env.IMAGE_NAME }}-${{ matrix.path }}:latest
