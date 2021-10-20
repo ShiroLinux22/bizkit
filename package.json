@@ -1,8 +1,8 @@
 {
-	"name": "ryuko",
+	"name": "bizkit",
 	"version": "3.0.0",
 	"private": true,
-	"repository": "https://github.com/chakernet/ryuko",
+	"repository": "https://github.com/chakernet/bizkit",
 	"scripts": {
 		"build": "tsc -b",
 		"format": "prettier --write ."

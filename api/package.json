@@ -1,5 +1,5 @@
 {
-	"name": "@ryukobot/api",
+	"name": "@bizkitbot/api",
 	"private": true,
 	"main": "dist/index.js",
 	"scripts": {

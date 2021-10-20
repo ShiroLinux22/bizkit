@@ -22,7 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/chakernet/ryuko/common/redis"
+	"github.com/chakernet/bizkit/common/redis"
 	"github.com/diamondburned/arikawa/v3/session"
 	"github.com/streadway/amqp"
 

@@ -19,7 +19,7 @@
 package events
 
 import (
-	"github.com/chakernet/ryuko/common/handler"
+	"github.com/chakernet/bizkit/common/handler"
 )
 
 type Handler struct {

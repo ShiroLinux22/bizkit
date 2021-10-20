@@ -1,4 +1,4 @@
-module github.com/chakernet/ryuko/common
+module github.com/chakernet/bizkit/common
 
 go 1.17
 

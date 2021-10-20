@@ -21,7 +21,7 @@ package amqp
 import (
 	"os"
 
-	"github.com/chakernet/ryuko/common/util"
+	"github.com/chakernet/bizkit/common/util"
 	"github.com/streadway/amqp"
 )
 

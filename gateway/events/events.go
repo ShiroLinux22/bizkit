@@ -19,8 +19,8 @@
 package events
 
 import (
-	"github.com/chakernet/ryuko/common/handler"
-	"github.com/chakernet/ryuko/common/util"
+	"github.com/chakernet/bizkit/common/handler"
+	"github.com/chakernet/bizkit/common/util"
 )
 
 var (

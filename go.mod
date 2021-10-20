@@ -1,3 +1,3 @@
-module github.com/chakernet/ryuko
+module github.com/chakernet/bizkit
 
 go 1.17

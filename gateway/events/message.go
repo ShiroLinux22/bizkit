@@ -21,8 +21,8 @@ package events
 import (
 	"reflect"
 
-	"github.com/chakernet/ryuko/common/handler"
-	"github.com/chakernet/ryuko/common/util"
+	"github.com/chakernet/bizkit/common/handler"
+	"github.com/chakernet/bizkit/common/util"
 	"github.com/diamondburned/arikawa/v3/gateway"
 	"github.com/streadway/amqp"
 )

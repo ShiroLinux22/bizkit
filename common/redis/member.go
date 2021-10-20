@@ -22,7 +22,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/chakernet/ryuko/common/util"
+	"github.com/chakernet/bizkit/common/util"
 	"github.com/diamondburned/arikawa/v3/discord"
 )
 

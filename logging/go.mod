@@ -1,12 +1,12 @@
-module github.com/chakernet/ryuko/logging
+module github.com/chakernet/bizkit/logging
 
 go 1.17
 
-replace github.com/chakernet/ryuko/common => ../common
+replace github.com/chakernet/bizkit/common => ../common
 
 require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/chakernet/ryuko/common v0.0.0-20211018133213-aae09012a549 // indirect
+	github.com/chakernet/bizkit/common v0.0.0-20211018133213-aae09012a549 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/diamondburned/arikawa/v3 v3.0.0-rc.2 // indirect
 	github.com/go-redis/redis/v8 v8.11.4 // indirect
