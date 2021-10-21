@@ -25,9 +25,12 @@ import (
 )
 
 func (h *Handler) MessageUpdate(m *handler.MessageUpdateEvent) error {
-	if m.Member.User.Bot {
+	if m.Member == nil || m.Member.User.Bot {
 		return nil
 	}
+    if m.Before == nil || m.Before.Content == "" || m.After.Content == "" {
+        return nil
+    }
 
     log.Printf(`Before: %s, After: %s`, m.Before.Content, m.After.Content)
 
