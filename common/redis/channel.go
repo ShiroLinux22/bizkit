@@ -63,7 +63,7 @@ func (r *Redis) GetChannel(id discord.ChannelID) (*discord.Channel, error) {
 
 	json.Unmarshal(bytes, &channel)
 
-	return nil, nil
+	return &channel, nil
 }
 
 func (r *Redis) DeleteChannel(id discord.ChannelID) error {

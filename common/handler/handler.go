@@ -1,5 +1,5 @@
 /*
-	Handler(s) for message-related events
+	Handler Struct(s)
     Copyright (C) 2021 Jack C <jack@chaker.net>
 
     This program is free software: you can redistribute it and/or modify
@@ -16,20 +16,13 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-package events
+package handler
 
 import (
-	"log"
-
-	"github.com/chakernet/bizkit/common/handler"
+	"reflect"
 )
 
-func (h *Handler) MessageUpdate(m *handler.MessageUpdateEvent) error {
-	if m.User.Bot {
-		return nil
-	}
-
-    log.Printf(`Before: %s, After: %s`, m.Before.Content, m.After.Content)
-
-	return nil
+type handler struct {
+	event reflect.Type
+	callback reflect.Value
 }

@@ -63,7 +63,7 @@ func (r *Redis) GetMessage(id discord.MessageID) (*discord.Message, error) {
 
 	json.Unmarshal(bytes, &message)
 
-	return nil, nil
+	return &message, nil
 }
 
 func (r *Redis) DeleteMessage(id discord.MessageID) error {

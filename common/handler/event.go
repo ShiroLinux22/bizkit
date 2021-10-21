@@ -21,6 +21,8 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"reflect"
+	"sync"
 
 	"github.com/chakernet/bizkit/common/redis"
 	"github.com/diamondburned/arikawa/v3/session"
@@ -75,8 +77,15 @@ type IEventHandler interface {
 	MessageReactionRemoveEmoji(*gateway.MessageReactionRemoveEmojiEvent) error
 }
 
+type MessageUpdateEvent struct {
+	*discord.Member `json:"member,omitempty"`
+	Before *discord.Message `json:"before,omitempty"`
+	After *discord.Message `json:"after"`
+}
+
 type EventHandler struct {
-	IEventHandler
+	mutex sync.RWMutex
+	mods map[string]handler
 
 	Channel *amqp.Channel
 	Discord *session.Session
@@ -93,6 +102,83 @@ type EventHandlerR struct {
 type Event struct {
 	Type string `json:"type"`
 	Data string `json:"data,omitempty"`
+}
+
+func (h *EventHandler) Create() {
+	h.mods = make(map[string]handler)
+}
+
+func (h *EventHandler) Call(ev interface{}) error {
+	evV := reflect.ValueOf(ev)
+	evT := evV.Type()
+
+	h.mutex.RLock()
+	defer h.mutex.RUnlock()
+
+	for _, value := range h.mods {
+		if value.event != evT {
+			continue
+		}
+		err := make(chan error, 1)
+		go func() {
+			fun := value.callback.Call([]reflect.Value{evV})
+			
+			if reflect.TypeOf(fun[0]).Implements(reflect.TypeOf((*error)(nil)).Elem()) {
+				er, _ := fun[0].Interface().(error)
+				err <- er
+				return
+			}
+
+			err <- nil
+			return
+		}()
+
+		if err != nil {
+			return <-err
+		}
+	}
+
+	return nil
+}
+
+func (h *EventHandler) AddHandler(fn interface{}) (error) {
+	r, err := newHandler(fn)
+	if err != nil {
+		return err
+	}
+
+	h.mutex.Lock()
+	h.mods[r.event.String()] = r
+	h.mutex.Unlock()
+
+	return nil
+}
+
+func newHandler(unknown interface{}) (handler, error) {
+	fnV := reflect.ValueOf(unknown)
+	fnT := fnV.Type()
+
+	handler := handler {
+		callback: fnV,
+	}
+
+	if fnT.Kind() != reflect.Func {
+		return handler, errors.New("only functions are accepted")
+	}
+
+	if fnT.NumIn() != 1 {
+		return handler, errors.New("function can only accept 1 argument")
+	}
+
+	handler.event = fnT.In(0)
+
+	kind := handler.event.Kind()
+
+	if kind != reflect.Ptr && kind != reflect.Interface {
+		return handler, errors.New("function argument is not a pointer")
+	}
+
+	return handler, nil
 }
 
 func (h *EventHandler) Handle(e Event) error {
@@ -119,7 +205,7 @@ func (h *EventHandler) Handle(e Event) error {
 			return err
 		}
 
-		err = h.MessageCreate(&gateway.MessageCreateEvent{
+		err = h.Call(&gateway.MessageCreateEvent{
 			Message: data,
 			Member:  mem,
 		})
@@ -130,7 +216,7 @@ func (h *EventHandler) Handle(e Event) error {
 		break
 
 	case "MESSAGE_UPDATE":
-		var data discord.Message
+		var data MessageUpdateEvent
 
 		err := json.Unmarshal(raw, &data)
 
@@ -138,22 +224,8 @@ func (h *EventHandler) Handle(e Event) error {
 			return err
 		}
 
-		mem, err := h.Redis.GetMember(data.GuildID, data.Author.ID)
-		if mem == nil && err == nil {
-			mem, err = h.Discord.Member(data.GuildID, data.Author.ID)
-
-			if err != nil {
-				return err
-			}
-		} else if err != nil {
-			return err
-		}
-
-		err = h.MessageUpdate(&gateway.MessageUpdateEvent{
-			Message: data,
-			Member:  mem,
-		})
-
+		err = h.Call(&data)
+		
 		if err != nil {
 			return err
 		}

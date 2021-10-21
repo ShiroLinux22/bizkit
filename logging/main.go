@@ -86,7 +86,10 @@ func bindEvents(sess *session.Session, ch *_amqp.Channel, redis *redis.Redis) {
 			Redis:   redis,
 		},
 	}
-	_handler.IEventHandler = _handler
+	_handler.Create()
+	
+	// Add Handlers
+	_handler.AddHandler(_handler.MessageUpdate)
 
 	q, err := ch.QueueDeclare(
 		"logging_events",
@@ -103,7 +106,7 @@ func bindEvents(sess *session.Session, ch *_amqp.Channel, redis *redis.Redis) {
 
 	err = ch.QueueBind(
 		q.Name,
-		"message.create",
+		"message.update",
 		"events_topic",
 		false,
 		nil,
@@ -143,7 +146,8 @@ func bindEvents(sess *session.Session, ch *_amqp.Channel, redis *redis.Redis) {
 
 			if err != nil {
 				log.Error("Failed to Handle a Message: %s", err)
-				d.Nack(false, true)
+				// Disabled because we don't want to constantly loop over the same event
+				// d.Nack(false, true)
 				continue
 			}
 

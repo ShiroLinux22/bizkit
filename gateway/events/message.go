@@ -19,8 +19,6 @@
 package events
 
 import (
-	"reflect"
-
 	"github.com/chakernet/bizkit/common/handler"
 	"github.com/chakernet/bizkit/common/util"
 	"github.com/diamondburned/arikawa/v3/gateway"
@@ -68,16 +66,13 @@ func (h *Handler) MessageCreate(m *gateway.MessageCreateEvent) {
 }
 
 func (h *Handler) MessageUpdate(m *gateway.MessageUpdateEvent) {
-	cached, err := h.Redis.GetMessage(m.ID)
+	message, err := h.Redis.GetMessage(m.ID)
 	if err != nil {
 		log.Error("Failed to get cached message: %s", err)
 	}
 
-	// We would like to assume that redis is the source of truth.
-	// This *should* be okay to assume in case of some weird
-	// edge case where a channel isn't present in local cache
-	if util.IsZero(reflect.ValueOf(cached)) {
-		cached = &m.Message
+	if message == nil {
+		log.Info("FUCK")
 	}
 
 	// Add Message into Redis
@@ -87,7 +82,11 @@ func (h *Handler) MessageUpdate(m *gateway.MessageUpdateEvent) {
 		return
 	}
 
-	data, err := util.ToJson(cached)
+	data, err := util.ToJson(handler.MessageUpdateEvent {
+		Before: message,
+		After: &m.Message,
+		Member: m.Member,
+	})
 	if err != nil {
 		log.Error("Failed to parse data to JSON: %s", err)
 		return
