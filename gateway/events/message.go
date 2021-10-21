@@ -33,16 +33,20 @@ func (h *Handler) MessageCreate(m *gateway.MessageCreateEvent) {
 		return
 	}
 
-	data, err := util.ToJson(m)
+	payload, err := util.ToJson(handler.MessageCreateEvent {
+		Message: &m.Message,
+		Member: m.Member,
+	})
 	if err != nil {
-		log.Error("Failed to parse data to JSON: %s", err)
+		log.Error("Failed to parse event to JSON: %s", err)
 		return
 	}
+
 	event := handler.Event{
 		Type: "MESSAGE_CREATE",
-		Data: data,
+		Data: payload,
 	}
-	payload, err := util.ToJson(event)
+	payload, err = util.ToJson(event)
 	if err != nil {
 		log.Error("Failed to parse event to JSON: %s", err)
 		return
@@ -119,7 +123,15 @@ func (h *Handler) MessageUpdate(m *gateway.MessageUpdateEvent) {
 }
 
 func (h *Handler) MessageDelete(m *gateway.MessageDeleteEvent) {
-	cached, err := h.Redis.GetMessage(m.ID)
+	message, err := h.Redis.GetMessage(m.ID)
+	if err != nil {
+		log.Error("Failed to get cached message: %s", err)
+	}
+	if message == nil {
+		return
+	}
+
+	member, err := h.Redis.GetMember(message.GuildID, message.Author.ID)
 	if err != nil {
 		log.Error("Failed to get cached message: %s", err)
 	}
@@ -127,11 +139,14 @@ func (h *Handler) MessageDelete(m *gateway.MessageDeleteEvent) {
 	// Add Message into Redis
 	err = h.Redis.DeleteMessage(m.ID)
 	if err != nil {
-		log.Error("Failed to delete message: %s", err)
+		log.Error("Failed to cache message: %s", err)
 		return
 	}
 
-	data, err := util.ToJson(cached)
+	data, err := util.ToJson(handler.MessageDeleteEvent {
+		Message: message,
+		Member: member,
+	})
 	if err != nil {
 		log.Error("Failed to parse data to JSON: %s", err)
 		return

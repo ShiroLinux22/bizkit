@@ -22,10 +22,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/diamondburned/arikawa/v3/gateway"
+	"github.com/chakernet/bizkit/common/handler"
 )
 
-func (h *Handler) MessageCreate(m *gateway.MessageCreateEvent) error {
+func (h *Handler) MessageCreate(m *handler.MessageCreateEvent) error {
 	if m.Author.Bot {
 		return nil
 	}

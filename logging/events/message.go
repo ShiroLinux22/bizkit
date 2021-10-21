@@ -25,11 +25,21 @@ import (
 )
 
 func (h *Handler) MessageUpdate(m *handler.MessageUpdateEvent) error {
-	if m.User.Bot {
+	if m.Member.User.Bot {
 		return nil
 	}
 
     log.Printf(`Before: %s, After: %s`, m.Before.Content, m.After.Content)
+
+	return nil
+}
+
+func (h *Handler) MessageDelete(m *handler.MessageDeleteEvent) error {
+	if m.Author.Bot {
+		return nil
+	}
+
+    log.Printf(`Before: %s`, m.Content)
 
 	return nil
 }

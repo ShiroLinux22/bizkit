@@ -32,57 +32,24 @@ import (
 	"github.com/diamondburned/arikawa/v3/gateway"
 )
 
-type IEventHandler interface {
-	// Message Events (GUILD_MESSAGES & DIRECT_MESSAGES)
-	MessageCreate(*gateway.MessageCreateEvent) error
-	MessageUpdate(*gateway.MessageUpdateEvent) error
-	MessageDelete(*gateway.MessageDeleteEvent) error
-	MessageDeleteBulk(*gateway.MessageDeleteBulkEvent) error // guild only
-
-	// Role Events (GUILDS)
-	GuildRoleCreate(*gateway.GuildRoleCreateEvent) error
-	GuildRoleUpdate(*gateway.GuildRoleUpdateEvent) error
-	GuildRoleDelete(*gateway.GuildRoleDeleteEvent) error
-
-	// Guild Events (GUILDS)
-	GuildCreate(*gateway.GuildCreateEvent) error
-	GuildUpdate(*gateway.GuildUpdateEvent) error
-	GuildDelete(*gateway.GuildDeleteEvent) error
-
-	// Channel Events (GUILDS)
-	ChannelCreate(*gateway.ChannelCreateEvent) error
-	ChannelUpdate(*gateway.ChannelUpdateEvent) error
-	ChannelDelete(*gateway.ChannelDeleteEvent) error
-
-	// Member Events (GUILD_MEMBERS)
-	GuildMemberAdd(*gateway.GuildMemberAddEvent) error
-	GuildMemberUpdate(*gateway.GuildMemberUpdateEvent) error
-	GuildMemberRemove(*gateway.GuildMemberRemoveEvent) error
-
-	// Ban Events (GUILD_BANS)
-	GuildBanAdd(*gateway.GuildBanAddEvent) error
-	GuildBanRemove(*gateway.GuildBanRemoveEvent) error
-
-	// Invite Events (GUILD_INVITES)
-	InviteCreate(*gateway.InviteCreateEvent) error
-	InviteDelete(*gateway.InviteDeleteEvent) error
-
-	// Voice State Events (GUILD_VOICE_STATES)
-	VoiceStateUpdate(*gateway.VoiceStateUpdateEvent) error
-
-	// Guild Message Reactions Events (GUILD_MESSAGE_REACTIONS & DIRECT_MESSAGE_REACTIONS)
-	MessageReactionAdd(*gateway.MessageReactionAddEvent) error
-	MessageReactionRemove(*gateway.MessageReactionRemoveEvent) error
-	MessageReactionRemoveAll(*gateway.MessageReactionRemoveAllEvent) error
-	MessageReactionRemoveEmoji(*gateway.MessageReactionRemoveEmojiEvent) error
+// Event Structs
+type MessageCreateEvent struct {
+	Member *discord.Member `json:"member"`
+	*discord.Message `json:"message"`
 }
-
 type MessageUpdateEvent struct {
-	*discord.Member `json:"member,omitempty"`
+	Member *discord.Member `json:"member,omitempty"`
 	Before *discord.Message `json:"before,omitempty"`
 	After *discord.Message `json:"after"`
 }
 
+type MessageDeleteEvent struct {
+	Member *discord.Member `json:"member"`
+	*discord.Message `json:"message,omitempty"`
+}
+
+
+// Other stuff
 type EventHandler struct {
 	mutex sync.RWMutex
 	mods map[string]handler
@@ -232,6 +199,19 @@ func (h *EventHandler) Handle(e Event) error {
 		break
 
 	case "MESSAGE_DELETE":
+		var data MessageDeleteEvent
+
+		err := json.Unmarshal(raw, &data)
+
+		if err != nil {
+			return err
+		}
+
+		err = h.Call(&data)
+		
+		if err != nil {
+			return err
+		}
 		break
 
 	default:

@@ -90,6 +90,7 @@ func bindEvents(sess *session.Session, ch *_amqp.Channel, redis *redis.Redis) {
 	
 	// Add Handlers
 	_handler.AddHandler(_handler.MessageUpdate)
+	_handler.AddHandler(_handler.MessageDelete)
 
 	q, err := ch.QueueDeclare(
 		"logging_events",
@@ -104,17 +105,7 @@ func bindEvents(sess *session.Session, ch *_amqp.Channel, redis *redis.Redis) {
 		log.Fatal("Failed to Declare a Queue: %s", err)
 	}
 
-	err = ch.QueueBind(
-		q.Name,
-		"message.update",
-		"events_topic",
-		false,
-		nil,
-	)
-
-	if err != nil {
-		log.Fatal("Failed to Bind a Queue: %s", err)
-	}
+	bindQueues(ch, q.Name)
 
 	msgs, err := ch.Consume(
 		q.Name,
@@ -155,4 +146,27 @@ func bindEvents(sess *session.Session, ch *_amqp.Channel, redis *redis.Redis) {
 			d.Ack(false)
 		}
 	}()
+}
+
+func bindQueues(ch *_amqp.Channel, name string) {
+	err := ch.QueueBind(
+		name,
+		"message.update",
+		"events_topic",
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Fatal("Failed to Bind a Queue: %s", err)
+	}
+	err = ch.QueueBind(
+		name,
+		"message.delete",
+		"events_topic",
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Fatal("Failed to Bind a Queue: %s", err)
+	}
 }

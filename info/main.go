@@ -86,7 +86,8 @@ func bindEvents(sess *session.Session, ch *_amqp.Channel, redis *redis.Redis) {
 			Redis:   redis,
 		},
 	}
-	_handler.IEventHandler = _handler
+	_handler.Create()
+	_handler.AddHandler(_handler.MessageCreate)
 
 	q, err := ch.QueueDeclare(
 		"info_events",
