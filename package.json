@@ -8,7 +8,7 @@
 		"format": "prettier --write ."
 	},
 	"author": "Jack C <jack@chaker.net>",
-	"license": "GPL-3.0",
+	"license": "AGPL-3.0-or-later",
 	"devDependencies": {
 		"@types/node": "^16.11.1",
 		"prettier": "^2.4.1",
