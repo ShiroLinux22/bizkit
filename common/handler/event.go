@@ -24,10 +24,6 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/chakernet/bizkit/common/redis"
-	"github.com/diamondburned/arikawa/v3/session"
-	"github.com/streadway/amqp"
-
 	"github.com/diamondburned/arikawa/v3/discord"
 	"github.com/diamondburned/arikawa/v3/gateway"
 )
@@ -50,20 +46,16 @@ type MessageDeleteEvent struct {
 
 
 // Other stuff
-type EventHandler struct {
-	mutex sync.RWMutex
-	mods map[string]handler
-
-	Channel *amqp.Channel
-	Discord *session.Session
-	Redis   *redis.Redis
+type event struct {
+	event reflect.Type
+	callback reflect.Value
 }
 
-// R means 'reduced'
-type EventHandlerR struct {
-	Channel *amqp.Channel
-	Discord *session.Session
-	Redis   *redis.Redis
+type EventHandler struct {
+	HandlerR
+
+	mutex sync.RWMutex
+	mods map[string]event
 }
 
 type Event struct {
@@ -72,7 +64,7 @@ type Event struct {
 }
 
 func (h *EventHandler) Create() {
-	h.mods = make(map[string]handler)
+	h.mods = make(map[string]event)
 }
 
 func (h *EventHandler) Call(ev interface{}) error {
@@ -109,7 +101,7 @@ func (h *EventHandler) Call(ev interface{}) error {
 }
 
 func (h *EventHandler) AddHandler(fn interface{}) (error) {
-	r, err := newHandler(fn)
+	r, err := newEvent(fn)
 	if err != nil {
 		return err
 	}
@@ -121,11 +113,11 @@ func (h *EventHandler) AddHandler(fn interface{}) (error) {
 	return nil
 }
 
-func newHandler(unknown interface{}) (handler, error) {
+func newEvent(unknown interface{}) (event, error) {
 	fnV := reflect.ValueOf(unknown)
 	fnT := fnV.Type()
 
-	handler := handler {
+	handler := event {
 		callback: fnV,
 	}
 

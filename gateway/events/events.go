@@ -30,5 +30,5 @@ var (
 )
 
 type Handler struct {
-	handler.EventHandlerR
+	handler.HandlerR
 }

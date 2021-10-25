@@ -19,10 +19,13 @@
 package handler
 
 import (
-	"reflect"
+	"github.com/chakernet/bizkit/common/redis"
+	"github.com/diamondburned/arikawa/v3/session"
+	"github.com/streadway/amqp"
 )
 
-type handler struct {
-	event reflect.Type
-	callback reflect.Value
+type HandlerR struct {
+    Channel *amqp.Channel
+	Discord *session.Session
+	Redis   *redis.Redis
 }
