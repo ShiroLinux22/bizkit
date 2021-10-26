@@ -9,6 +9,7 @@ require (
 	github.com/chakernet/bizkit/common v0.0.0-20211018133213-aae09012a549 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/diamondburned/arikawa/v3 v3.0.0-rc.2 // indirect
+	github.com/getsentry/sentry-go v0.11.0 // indirect
 	github.com/go-redis/redis/v8 v8.11.4 // indirect
 	github.com/gorilla/schema v1.2.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect

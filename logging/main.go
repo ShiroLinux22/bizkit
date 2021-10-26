@@ -28,6 +28,7 @@ import (
 	"github.com/chakernet/bizkit/common/util"
 	"github.com/chakernet/bizkit/logging/events"
 	"github.com/diamondburned/arikawa/v3/session"
+	"github.com/getsentry/sentry-go"
 	"github.com/joho/godotenv"
 	_amqp "github.com/streadway/amqp"
 )
@@ -45,7 +46,20 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to load env: %s", err)
 	}
+	env := os.Getenv("GO_ENV")
 	token := os.Getenv("BOT_TOKEN")
+	sentry_dsn := os.Getenv("SENTRY_DSN")
+	if sentry_dsn != "" && env == "production" {
+		err = sentry.Init(sentry.ClientOptions{
+			Dsn:         sentry_dsn,
+			Environment: "production",
+		})
+		if err != nil {
+			log.Error("Error initializing sentry: %s", err)
+		}
+	} else {
+		log.Warn("GO_ENV is not production or SENTRY_DSN is undefined, not loading sentry")
+	}
 
 	// Connect to redis
 	rdb := redis.Redis{}

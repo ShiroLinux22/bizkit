@@ -1,8 +1,19 @@
 {
 	"name": "@bizkitbot/api",
+	"version": "1.0.0",
 	"private": true,
 	"main": "dist/index.js",
 	"scripts": {
-		"start": "node ."
+		"start": "node .",
+		"build": "tsc"
+	},
+	"dependencies": {
+		"@sentry/node": "^6.13.3",
+		"@sentry/tracing": "^6.13.3",
+		"dotenv": "^10.0.0",
+		"express": "^4.17.1"
+	},
+	"devDependencies": {
+		"@types/express": "^4.17.13"
 	}
 }

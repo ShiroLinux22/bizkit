@@ -16,4 +16,47 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-console.log("Hello World!");
+import path from "path";
+import dotenv from "dotenv";
+import { init as sentryInit, Handlers, Integrations } from "@sentry/node";
+import { Integrations as TracingIntergrations } from "@sentry/tracing";
+import Web from "./web";
+
+// Load dotenv
+dotenv.config({
+	path: path.resolve(__dirname, "../../.env"),
+});
+if (!process.env.PORT) {
+	console.error("PORT not set, defaulting to 3000");
+}
+
+const production = process.env.NODE_ENV == "production";
+
+// Create Web Server
+const app = new Web();
+
+if (production && process.env.SENTRY_DSN != "") {
+	sentryInit({
+		dsn: process.env.SENTRY_DSN,
+		environment: "production",
+
+		integrations: [
+			new Integrations.Http({ tracing: true }),
+			new TracingIntergrations.Express({
+				app: app.app,
+			}),
+		],
+	});
+
+	app.app.use(Handlers.requestHandler());
+	app.app.use(Handlers.tracingHandler());
+	app.app.use(Handlers.errorHandler());
+} else
+	console.log(
+		"NODE_ENV is not production or SENTRY_DSN is undefined, skipping sentry",
+	);
+
+// Listen on Web Server
+const port: number = parseInt(process.env.PORT || "3000");
+app.listen(port);
+console.log(`Listening on port ${port}`);
