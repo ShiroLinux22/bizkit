@@ -39,6 +39,9 @@ jobs:
 
     typescript:
         runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                path: ["api"]
         steps:
             - uses: actions/checkout@v2
 
@@ -52,4 +55,5 @@ jobs:
               run: yarn --immutable
 
             - name: Build
+              working-directory: ./${{ matrix.path }}
               run: yarn build
