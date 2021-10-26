@@ -52,7 +52,7 @@ func main() {
 	if sentry_dsn != "" && env == "production" {
 		err = sentry.Init(sentry.ClientOptions{
 			Dsn:         sentry_dsn,
-			Environment: "info",
+			Environment: "production",
 		})
 		if err != nil {
 			log.Error("Error initializing sentry: %s", err)

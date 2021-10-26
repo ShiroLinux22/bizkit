@@ -38,7 +38,7 @@ const app = new Web();
 if (production && process.env.SENTRY_DSN != "") {
 	sentryInit({
 		dsn: process.env.SENTRY_DSN,
-		environment: "api",
+		environment: "production",
 
 		integrations: [
 			new Integrations.Http({ tracing: true }),
